@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+    provider     = "mysql"
+    url          = env("DATABASE_URL")
+    relationMode = "prisma"
 }
 
 model Example {
@@ -29,9 +30,10 @@ model Account {
     scope             String?
     id_token          String? @db.Text
     session_state     String?
-    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    User              User    @relation(fields: [userId], references: [id])
 
     @@unique([provider, providerAccountId])
+    @@index([userId])
 }
 
 model Session {
@@ -39,7 +41,7 @@ model Session {
     sessionToken String   @unique
     userId       String
     expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user         User     @relation(fields: [userId], references: [id])
 }
 
 model User {
@@ -67,8 +69,19 @@ model Poll {
 }
 
 model Answer {
-    id     String  @id @default(cuid())
-    Poll   Poll?   @relation(fields: [pollId], references: [id])
-    pollId String?
-    text   String
+    id        String     @id @default(cuid())
+    Poll      Poll?      @relation(fields: [pollId], references: [id])
+    pollId    String?
+    text      String
+    responses Response[]
+
+    @@index([pollId])
+}
+
+model Response {
+    id       String  @id @default(cuid())
+    answerId String?
+    Answer   Answer? @relation(fields: [answerId], references: [id])
+
+    @@index([answerId])
 }

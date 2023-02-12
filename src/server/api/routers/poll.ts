@@ -14,7 +14,26 @@ export const pollRouter = createTRPCRouter({
           id: input.pollId,
         },
         include: {
-          answers: true,
+          answers: {
+            include: {
+              _count: {
+                select: { responses: true },
+              },
+            },
+          },
+        },
+      });
+    }),
+  submitResponse: publicProcedure
+    .input(
+      z.object({
+        answerId: z.string(),
+      })
+    )
+    .mutation(({ ctx, input }) => {
+      return ctx.prisma.response.create({
+        data: {
+          answerId: input.answerId,
         },
       });
     }),
