@@ -18,6 +18,7 @@ const PollPage: NextPage = () => {
       pollId,
     },
     {
+      refetchInterval: 5000,
       enabled: !!pollId,
     }
   );
@@ -45,6 +46,15 @@ const PollPage: NextPage = () => {
       .catch(console.error);
   }
 
+  const totalResponses = poll?.answers.reduce(
+    (sum, answer) => sum + answer._count.responses,
+    0
+  );
+
+  function getWidth(count: number) {
+    return (count / (totalResponses || 1)) * 400;
+  }
+
   return (
     <>
       <Head>
@@ -60,11 +70,19 @@ const PollPage: NextPage = () => {
             <h1 className="text-4xl">{poll?.prompt}</h1>
 
             {hasAnswered ? (
-              <ul>
+              <ul className="flex flex-col gap-2">
                 {poll?.answers.map((answer) => (
-                  <li key={answer.id}>
-                    {answer.text}: {answer._count.responses} votes
-                  </li>
+                  <>
+                    <li key={answer.id} className="">
+                      {answer.text}: {answer._count.responses} votes
+                    </li>
+                    <div
+                      className=" h-6 bg-gray-500"
+                      style={{
+                        width: `${getWidth(answer._count.responses)}px`,
+                      }}
+                    ></div>
+                  </>
                 ))}
               </ul>
             ) : (
